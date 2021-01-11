@@ -1,0 +1,94 @@
+{
+	"info": {
+		"_postman_id": "51a336ba-e9cf-4ec5-8dd4-e5e9d7ddcef3",
+		"name": "ceph",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get content from ceph",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{secret-key}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{access-key}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base-url}}/{{bucket-name}}/{{document-key}}",
+					"host": [
+						"{{base-url}}"
+					],
+					"path": [
+						"{{bucket-name}}",
+						"{{document-key}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put content to ceph",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{secret-key}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{access-key}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"data\":\"test data\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base-url}}/{{bucket-name}}/{{document-key}}",
+					"host": [
+						"{{base-url}}"
+					],
+					"path": [
+						"{{bucket-name}}",
+						"{{document-key}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
