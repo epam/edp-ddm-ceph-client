@@ -77,4 +77,10 @@ public class CephServiceS3Impl extends BaseCephService implements CephService {
     assertBucketExists(cephAmazonS3, cephBucketName);
     executeRunnable(() -> cephAmazonS3.deleteObject(cephBucketName, key));
   }
+
+  @Override
+  public boolean doesObjectExist(String cephBucketName, String key) {
+    assertBucketExists(cephAmazonS3, cephBucketName);
+    return execute(() -> cephAmazonS3.doesObjectExist(cephBucketName, key));
+  }
 }

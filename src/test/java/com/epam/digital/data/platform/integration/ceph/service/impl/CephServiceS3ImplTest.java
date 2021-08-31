@@ -178,4 +178,15 @@ public class CephServiceS3ImplTest {
 
     assertThat(cephServiceS3.getContent(bucketName, contentKey)).isEmpty();
   }
+
+  @Test
+  public void doesObjectExist() {
+    var bucketName = "bucket";
+    var contentKey = "key";
+
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.doesObjectExist(bucketName, contentKey)).thenReturn(true);
+
+    assertThat(cephServiceS3.doesObjectExist(bucketName, contentKey)).isTrue();
+  }
 }

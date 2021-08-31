@@ -69,4 +69,15 @@ public interface CephService {
    */
   @NewSpan
   void deleteObject(String cephBucketName, String key);
+
+  /**
+   * Check if object exists in bucket
+   *
+   * @param cephBucketName ceph bucket name
+   * @param key            document id
+   * @throws MisconfigurationException if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  @NewSpan
+  boolean doesObjectExist(String cephBucketName, String key);
 }
