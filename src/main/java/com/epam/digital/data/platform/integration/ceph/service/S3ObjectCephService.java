@@ -26,7 +26,7 @@ public interface S3ObjectCephService {
    * @throws MisconfigurationException if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
+  @NewSpan("putFileObject")
   ObjectMetadata put(String key, String contentType, Map<String, String> userMetadata,
       InputStream fileInputStream);
 
@@ -38,7 +38,7 @@ public interface S3ObjectCephService {
    * @throws MisconfigurationException if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
+  @NewSpan("getFileObject")
   Optional<S3Object> get(String key);
 
   /**
@@ -49,7 +49,7 @@ public interface S3ObjectCephService {
    * @throws MisconfigurationException if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
+  @NewSpan("getObjectsMetadata")
   Optional<List<ObjectMetadata>> getMetadata(List<String> keys);
 
   /**
@@ -59,7 +59,7 @@ public interface S3ObjectCephService {
    * @throws MisconfigurationException if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
+  @NewSpan("deleteObjects")
   void delete(List<String> keys);
 
   /**
@@ -68,7 +68,7 @@ public interface S3ObjectCephService {
    * @param keys specified keys.
    * @return true if all keys exist in storage.
    */
-  @NewSpan
+  @NewSpan("checkKeysExistence")
   Boolean exist(List<String> keys);
 
   /**
@@ -77,6 +77,6 @@ public interface S3ObjectCephService {
    * @param prefix used to search keys beginning with the specified prefix.
    * @return list of keys
    */
-  @NewSpan
+  @NewSpan("getObjectsKeys")
   List<String> getKeys(String prefix);
 }
