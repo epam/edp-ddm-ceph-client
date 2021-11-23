@@ -38,6 +38,7 @@ ceph.secret-key=
   * `mvn verify` OR using appropriate functions of your IDE.
   
 ### Postman
+
  To check GET/PUT endpoints:
 - Import `ceph.postman_collection.json` to your postman
 - Set next environments:
@@ -51,5 +52,5 @@ ceph.secret-key=
 
 ### License
 
-The ddm-ceph-client is released under version 2.0 of
-the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+The ddm-ceph-client is Open Source software released under
+the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
