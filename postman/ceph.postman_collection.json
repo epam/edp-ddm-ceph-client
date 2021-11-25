@@ -78,16 +78,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://s3-openshift-storage.apps.cicd.mdtu-ddm.projects.epam.com/{{bucket-name}}/{{document-key}}",
-					"protocol": "https",
+					"raw": "{{base-url}}/{{bucket-name}}/{{document-key}}",
 					"host": [
-						"s3-openshift-storage",
-						"apps",
-						"cicd",
-						"mdtu-ddm",
-						"projects",
-						"epam",
-						"com"
+						"{{base-url}}"
 					],
 					"path": [
 						"{{bucket-name}}",
