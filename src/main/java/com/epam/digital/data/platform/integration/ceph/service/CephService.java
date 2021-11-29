@@ -16,40 +16,42 @@
 
 package com.epam.digital.data.platform.integration.ceph.service;
 
-import com.epam.digital.data.platform.integration.ceph.dto.CephObject;
 import com.epam.digital.data.platform.integration.ceph.exception.CephCommunicationException;
 import com.epam.digital.data.platform.integration.ceph.exception.MisconfigurationException;
+import com.epam.digital.data.platform.integration.ceph.model.CephObject;
+import com.epam.digital.data.platform.integration.ceph.model.CephObjectMetadata;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.cloud.sleuth.annotation.NewSpan;
 
-/**
- * Ceph client class that is used for managing content
- */
 public interface CephService {
-
-  /**
-   * Retrieve content by ceph bucket name and document id.
-   *
-   * @param cephBucketName ceph bucket name
-   * @param key            document id
-   * @return the document string representation (optional)
-   * @throws MisconfigurationException if ceph bucket not exist
-   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
-   */
-  @NewSpan
-  Optional<String> getContent(String cephBucketName, String key);
 
   /**
    * Retrieve ceph content by ceph bucket name and document id.
    *
    * @param cephBucketName ceph bucket name
    * @param key            document id
-   * @return ceph content and some custom additional info
-   * @throws MisconfigurationException if ceph bucket not exist
+   * @return ceph content and metadata
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  @NewSpan("getObject")
+  Optional<CephObject> get(String cephBucketName, String key);
+
+  /**
+   * Retrieve content as string by ceph bucket name and document id.
+   *
+   * @param cephBucketName ceph bucket name
+   * @param key            document id
+   * @return the document string representation (optional)
+   * @throws MisconfigurationException  if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
   @NewSpan
-  Optional<CephObject> getObject(String cephBucketName, String key);
+  Optional<String> getAsString(String cephBucketName, String key);
 
   /**
    * Put string content to ceph bucket
@@ -57,43 +59,79 @@ public interface CephService {
    * @param cephBucketName ceph bucket name
    * @param key            document id
    * @param content        the content to put itself
-   * @throws MisconfigurationException if ceph bucket not exist
+   * @throws MisconfigurationException  if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
-  void putContent(String cephBucketName, String key, String content);
+  @NewSpan("putContentAsString")
+  void put(String cephBucketName, String key, String content);
 
   /**
-   * Put byte[] content to ceph bucket
+   * Put file object to ceph storage.
    *
-   * @param cephBucketName ceph bucket name
-   * @param key            document id
-   * @param cephObject     the content to put itself
-   * @throws MisconfigurationException if ceph bucket not exist
+   * @param key             object id.
+   * @param contentType     object content type.
+   * @param userMetadata    additional user metadata.
+   * @param fileInputStream file input stream.
+   * @return metadata of the saved object.
+   * @throws MisconfigurationException  if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
-  @NewSpan
-  void putObject(String cephBucketName, String key, CephObject cephObject);
+  @NewSpan("putObject")
+  CephObjectMetadata put(String cephBucketName, String key, String contentType,
+      Map<String, String> userMetadata, InputStream fileInputStream);
 
   /**
-   * Delete content from ceph bucket
+   * Delete objects by keys.
    *
-   * @param cephBucketName ceph bucket name
-   * @param key            document id
-   * @throws MisconfigurationException if ceph bucket not exist
+   * @param keys objects keys.
+   * @throws MisconfigurationException  if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
   @NewSpan
-  void deleteObject(String cephBucketName, String key);
+  void delete(String cephBucketName, Set<String> keys);
+
+  /**
+   * Check keys existence.
+   *
+   * @param keys specified keys.
+   * @return true if all keys exist in storage.
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  @NewSpan("checkKeysExistence")
+  Boolean exist(String cephBucketName, Set<String> keys);
 
   /**
    * Check if object exists in bucket
    *
    * @param cephBucketName ceph bucket name
    * @param key            document id
-   * @throws MisconfigurationException if ceph bucket not exist
+   * @throws MisconfigurationException  if ceph bucket not exist
    * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
    */
+  @NewSpan("checkKeyExistence")
+  Boolean exist(String cephBucketName, String key);
+
+  /**
+   * Get list of keys by prefix
+   *
+   * @param prefix used to search keys beginning with the specified prefix
+   * @return set of keys
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph               .
+   */
   @NewSpan
-  boolean doesObjectExist(String cephBucketName, String key);
+  Set<String> getKeys(String cephBucketName, String prefix);
+
+  /**
+   * Get objects metadata by keys.
+   *
+   * @param keys object ids.
+   * @return list of objects metadata.
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  @NewSpan("getObjectsMetadata")
+  List<CephObjectMetadata> getMetadata(String cephBucketName, Set<String> keys);
+
 }

@@ -6,7 +6,7 @@
 
   <groupId>com.epam.digital.data.platform</groupId>
   <artifactId>ddm-ceph-client</artifactId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.5.1-SNAPSHOT</version>
 
   <name>ddm-ceph-client</name>
   <description>General ceph client</description>
@@ -15,36 +15,20 @@
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-
-    <spring.boot.version>2.3.9.RELEASE</spring.boot.version>
     <spring-cloud-sleuth.version>2.2.6.RELEASE</spring-cloud-sleuth.version>
     <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
-
+    <lombok.version>1.18.18</lombok.version>
+    <mockito.version>4.1.0</mockito.version>
+    <assertj.version>3.21.0</assertj.version>
+    <junit5.version>5.8.1</junit5.version>
     <aws.java.sdk.version>1.11.918</aws.java.sdk.version>
 
     <sonar.coverage.exclusions>
-      **/config/**/*,
-      **/dto/**/*
+      **/model/**/*
     </sonar.coverage.exclusions>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring.boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
@@ -53,6 +37,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -61,8 +46,21 @@
       <version>${spring-cloud-sleuth.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit5.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.integration.ceph;
+package com.epam.digital.data.platform.integration.ceph.model;
 
-public final class UserMetadataHeaders {
+import java.io.InputStream;
+import lombok.Builder;
+import lombok.Data;
 
-  public static final String ID = "id";
-  public static final String CHECKSUM = "checksum";
-  public static final String FILENAME = "filename";
+@Data
+@Builder
+public class CephObject {
+
+  private InputStream content;
+  private CephObjectMetadata metadata;
 }

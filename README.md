@@ -21,17 +21,37 @@
 </dependencies>
 ```
 
-- Import `com.epam.digital.data.platform.integration.ceph.config.CephConfig` to your config
-- Define these properties in your project 
-```properties
-ceph.http-endpoint=
-ceph.access-key=
-ceph.secret-key=
-```
-- Inject `com.epam.digital.data.platform.integration.ceph.service.CephService` to your service
+- Choose and create `com.epam.digital.data.platform.integration.ceph.service.CephService` implementation(list of available implementations below).
+- Inject `com.epam.digital.data.platform.integration.ceph.legacy.service.CephService` to your service
 - Make sure the bucket you're using exists, or you will get `MisconfigurationException`
 - Be aware of all amazon exceptions wrapped by `CephCommunicationException`
 
+### Available CephService Implementations:
+- `com.epam.digital.data.platform.integration.ceph.service.impl.CephServiceS3Impl` (Amazon S3)  
+The service uses Amazon S3 as a storage. There are two options available for creation this service:
+  - Declaration the bean using builder:
+    ```java
+    @Bean
+    public CephService cephService(
+      @Value("${<property-path>}") String cephHttpEndpoint,
+      @Value("${<property-path>}") String cephAccessKey,
+      @Value("${<property-path>}") String cephSecretKey) {
+    return CephServiceS3Impl.builder()
+          .cephEndpoint(cephHttpEndpoint)
+          .cephAccessKey(cephAccessKey)
+          .cephSecretKey(cephSecretKey)
+          .build();
+    }
+    ```
+    In this case `@PostConstruct` runs and builds AmazonS3 client object using specified properties.
+  - Create service using constructor and set AmazonS3 client directly:
+    ```java
+      var amazonS3Client = AmazonS3ClientBuilder.standard(). 
+        ... 
+        .build()
+    
+      new CephServiceS3Impl(amazonS3Client);
+    ```
 ### Test execution
 
 * Tests could be run via maven command:
