@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -253,9 +254,9 @@ class CephServiceS3ImplTest {
   void testExistKeys() {
     var bucketName = "bucket";
     var contentKey = "key";
-    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
-    when(amazonS3.doesObjectExist(bucketName, contentKey)).thenReturn(true);
-    when(amazonS3.doesObjectExist(bucketName, "notExist")).thenReturn(false);
+    lenient().when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    lenient().when(amazonS3.doesObjectExist(bucketName, contentKey)).thenReturn(true);
+    lenient().when(amazonS3.doesObjectExist(bucketName, "notExist")).thenReturn(false);
 
     assertThat(cephServiceS3.exist(bucketName, Set.of(contentKey, "notExist"))).isFalse();
   }

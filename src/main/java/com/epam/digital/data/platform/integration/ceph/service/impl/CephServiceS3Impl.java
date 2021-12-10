@@ -47,17 +47,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CephServiceS3Impl implements CephService {
 
-  private String cephEndpoint;
-  private String cephAccessKey;
-  private String cephSecretKey;
-
-  private AmazonS3 cephAmazonS3;
+  private final AmazonS3 cephAmazonS3;
 
   @Builder
   public CephServiceS3Impl(String cephEndpoint, String cephAccessKey, String cephSecretKey) {
-    this.cephEndpoint = cephEndpoint;
-    this.cephAccessKey = cephAccessKey;
-    this.cephSecretKey = cephSecretKey;
     var credentials = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(cephAccessKey, cephSecretKey));
     var clientConfig = new ClientConfiguration();

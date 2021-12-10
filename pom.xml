@@ -6,7 +6,7 @@
 
   <groupId>com.epam.digital.data.platform</groupId>
   <artifactId>ddm-ceph-client</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
 
   <name>ddm-ceph-client</name>
   <description>General ceph client</description>
@@ -24,7 +24,9 @@
     <aws.java.sdk.version>1.11.918</aws.java.sdk.version>
 
     <sonar.coverage.exclusions>
-      **/model/**/*
+      **/model/**/*,
+      **/config/**/*,
+      **/factory/**/*
     </sonar.coverage.exclusions>
   </properties>
 
