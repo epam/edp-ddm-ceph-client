@@ -165,6 +165,17 @@ public class CephServiceS3Impl implements CephService {
   }
 
   @Override
+  public Set<String> getKeys(String cephBucketName) {
+    log.info("Getting all ceph keys from bucket {}", cephBucketName);
+    assertBucketExists(cephAmazonS3, cephBucketName);
+    var result = execute(
+        () -> cephAmazonS3.listObjects(cephBucketName).getObjectSummaries().stream()
+            .map(S3ObjectSummary::getKey).collect(Collectors.toSet()));
+    log.info("Found {} keys from bucket {}", result.size(), cephBucketName);
+    return result;
+  }
+
+  @Override
   public List<CephObjectMetadata> getMetadata(String cephBucketName, Set<String> keys) {
     log.info("Getting file metadata for keys {} from ceph bucket {}", keys, cephBucketName);
     assertBucketExists(cephAmazonS3, cephBucketName);

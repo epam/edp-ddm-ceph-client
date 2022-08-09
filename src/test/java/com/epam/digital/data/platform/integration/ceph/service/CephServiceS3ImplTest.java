@@ -288,4 +288,19 @@ class CephServiceS3ImplTest {
     assertThat(objectMetadata.getUserMetadata().get("checksum")).isEqualTo("sha256hex");
     assertThat(objectMetadata.getUserMetadata().get("filename")).isEqualTo("filename.png");
   }
+
+  @Test
+  void testGetKeysInBucket() {
+    var s3ObjectSummary = new S3ObjectSummary();
+    var bucketName = "bucket";
+    s3ObjectSummary.setKey("process/1d7fb67b-0125-11ed-8911-0a580a803423/task/Activity_1");
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.listObjects(bucketName)).thenReturn(objectListing);
+    when(objectListing.getObjectSummaries()).thenReturn(List.of(s3ObjectSummary));
+
+    var keys = cephServiceS3.getKeys(bucketName);
+
+    assertThat(keys.size()).isEqualTo(1);
+    assertThat(keys.iterator().next()).isEqualTo(s3ObjectSummary.getKey());
+  }
 }

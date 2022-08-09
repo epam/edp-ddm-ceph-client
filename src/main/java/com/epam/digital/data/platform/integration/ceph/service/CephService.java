@@ -124,6 +124,16 @@ public interface CephService {
   Set<String> getKeys(String cephBucketName, String prefix);
 
   /**
+   * Get list of all keys in ceph storage
+   *
+   * @param cephBucketName ceph bucket name
+   * @return set of keys
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  Set<String> getKeys(String cephBucketName);
+
+  /**
    * Get objects metadata by keys.
    *
    * @param keys object ids.
