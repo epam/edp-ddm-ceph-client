@@ -144,4 +144,12 @@ public interface CephService {
   @NewSpan("getObjectsMetadata")
   List<CephObjectMetadata> getMetadata(String cephBucketName, Set<String> keys);
 
+  /**
+   * Get objects metadata by key prefix.
+   *
+   * @param keyPrefix specified key prefix
+   * @return list of objects metadata.
+   */
+  @NewSpan("getObjectsMetadata")
+  List<CephObjectMetadata> getMetadata(String cephBucketName, String keyPrefix);
 }
