@@ -254,7 +254,8 @@ class CephServiceS3ImplTest {
   void testExistKeys() {
     var bucketName = "bucket";
     var contentKey = "key";
-    lenient().when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    lenient().when(amazonS3.listBuckets())
+        .thenReturn(Collections.singletonList(new Bucket(bucketName)));
     lenient().when(amazonS3.doesObjectExist(bucketName, contentKey)).thenReturn(true);
     lenient().when(amazonS3.doesObjectExist(bucketName, "notExist")).thenReturn(false);
 
@@ -287,6 +288,28 @@ class CephServiceS3ImplTest {
     assertThat(objectMetadata.getUserMetadata().get("id")).isEqualTo(contentKey);
     assertThat(objectMetadata.getUserMetadata().get("checksum")).isEqualTo("sha256hex");
     assertThat(objectMetadata.getUserMetadata().get("filename")).isEqualTo("filename.png");
+  }
+
+  @Test
+  void testGetMetadataByPrefix() {
+    var contentKey = "key";
+    var bucketName = "bucket";
+    var userMetadata = Map.of(
+        "fieldName", "documents",
+        "formKey", "document_upload_form"
+    );
+    var testObjectMetadata = new ObjectMetadata();
+    testObjectMetadata.setUserMetadata(userMetadata);
+
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.getObjectMetadata(bucketName, contentKey)).thenReturn(testObjectMetadata);
+    when(amazonS3.doesObjectExist(bucketName, contentKey)).thenReturn(true);
+
+    var metadata = cephServiceS3.getMetadata(bucketName, Set.of(contentKey));
+    assertThat(metadata.size()).isOne();
+    var objectMetadata = metadata.get(0);
+    assertThat(objectMetadata.getUserMetadata().get("fieldName")).isEqualTo("documents");
+    assertThat(objectMetadata.getUserMetadata().get("formKey")).isEqualTo("document_upload_form");
   }
 
   @Test
