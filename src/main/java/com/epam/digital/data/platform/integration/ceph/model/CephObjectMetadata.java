@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CephObjectMetadata {
 
-  private Long contentLength;
+  private long contentLength;
   private String contentType;
   private Map<String, String> userMetadata;
 }

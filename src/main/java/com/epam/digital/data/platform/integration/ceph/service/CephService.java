@@ -81,6 +81,22 @@ public interface CephService {
       Map<String, String> userMetadata, InputStream fileInputStream);
 
   /**
+   * Put file object to ceph storage.
+   *
+   * @param key             object id.
+   * @param contentType     object content type.
+   * @param userMetadata    additional user metadata.
+   * @param inputStream     input stream.
+   * @return metadata of the saved object.
+   * @throws MisconfigurationException  if ceph bucket not exist
+   * @throws CephCommunicationException if faced any 4xx or 5xx error from Ceph
+   */
+  @NewSpan("putObject")
+  CephObjectMetadata put(String cephBucketName, String key, String contentType, long contentLength,
+      Map<String, String> userMetadata, InputStream inputStream);
+
+  
+  /**
    * Delete objects by keys.
    *
    * @param keys objects keys.
@@ -152,4 +168,16 @@ public interface CephService {
    */
   @NewSpan("getObjectsMetadata")
   List<CephObjectMetadata> getMetadata(String cephBucketName, String keyPrefix);
+
+
+  /**
+   * Set user metadata by key.
+   *
+   * @param key             object id.
+   * @param userMetadata    new user metadata.
+   * @return set user metadata to current object.
+   */
+  @NewSpan("setUserMetadata")
+  CephObjectMetadata setUserMetadata(
+      String cephBucketName, String key, Map<String, String> userMetadata);
 }

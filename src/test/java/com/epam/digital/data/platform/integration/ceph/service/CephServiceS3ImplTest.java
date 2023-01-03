@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -185,6 +186,29 @@ class CephServiceS3ImplTest {
   }
 
   @Test
+  void putObjectContentWithContentLength() {
+    var bucketName = "bucket";
+    var contentKey = "key";
+    var content = new ByteArrayInputStream("content".getBytes());
+    var contentType = "application/png";
+    var userMetadata = Map.of("name", "value");
+
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.getObjectMetadata(bucketName, contentKey)).thenReturn(new ObjectMetadata());
+
+    cephServiceS3.put(bucketName, contentKey, contentType, 999L,
+        Map.of("name", "value"), content);
+
+    var objectMetadataArgCaptor = ArgumentCaptor.forClass(ObjectMetadata.class);
+    verify(amazonS3).putObject(eq(bucketName), eq(contentKey), eq(content),
+        objectMetadataArgCaptor.capture());
+    var objectMetadataValue = objectMetadataArgCaptor.getValue();
+    assertThat(objectMetadataValue.getUserMetadata()).isEqualTo(userMetadata);
+    assertThat(objectMetadataValue.getContentType()).isEqualTo(contentType);
+    assertThat(objectMetadataValue.getContentLength()).isEqualTo(999L);
+  }
+
+  @Test
   void deleteContent() {
     var bucketName = "bucket";
     var contentKey = "key";
@@ -325,5 +349,31 @@ class CephServiceS3ImplTest {
 
     assertThat(keys.size()).isEqualTo(1);
     assertThat(keys.iterator().next()).isEqualTo(s3ObjectSummary.getKey());
+  }
+  
+  @Test
+  void shouldSetUserMetadataToNewObjectMetadata() {
+    var contentKey = "key";
+    var bucketName = "bucket";
+
+    var newUserMetadata = Map.of(
+        "id", contentKey,
+        "checksum", "sha256hex",
+        "filename", "filename.png"
+    );
+    var testObjectMetadata = new ObjectMetadata();
+    testObjectMetadata.setUserMetadata(newUserMetadata);
+
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.getObjectMetadata(bucketName, contentKey)).thenReturn(testObjectMetadata);
+    
+    cephServiceS3.setUserMetadata(bucketName, contentKey, newUserMetadata);
+
+    var requestCaptor = ArgumentCaptor.forClass(CopyObjectRequest.class);
+    verify(amazonS3).copyObject(requestCaptor.capture());
+    var objectMetadata = requestCaptor.getValue().getNewObjectMetadata().getUserMetadata();
+    assertThat(objectMetadata.get("id")).isEqualTo(contentKey);
+    assertThat(objectMetadata.get("checksum")).isEqualTo("sha256hex");
+    assertThat(objectMetadata.get("filename")).isEqualTo("filename.png");
   }
 }
