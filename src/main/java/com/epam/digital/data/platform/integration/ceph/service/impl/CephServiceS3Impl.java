@@ -23,6 +23,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -119,6 +120,22 @@ public class CephServiceS3Impl implements CephService {
     return toCephObjectMetadata(result);
   }
 
+  @Override
+  public CephObjectMetadata put(String cephBucketName, String key, String contentType,
+      long contentLength, Map<String, String> userMetadata, InputStream content) {
+    log.info("Putting file with key {} to ceph bucket {}", key, cephBucketName);
+    assertBucketExists(cephAmazonS3, cephBucketName);
+    var result = execute(() -> {
+      var objectMetadata = new ObjectMetadata();
+      objectMetadata.setContentType(contentType);
+      objectMetadata.setContentLength(contentLength);
+      objectMetadata.setUserMetadata(userMetadata);
+      cephAmazonS3.putObject(cephBucketName, key, content, objectMetadata);
+      return cephAmazonS3.getObjectMetadata(cephBucketName, key);
+    });
+    log.info("File {} was put to ceph bucket {}", key, cephBucketName);
+    return toCephObjectMetadata(result);
+  }
 
   @Override
   public void delete(String cephBucketName, Set<String> keys) {
@@ -204,6 +221,28 @@ public class CephServiceS3Impl implements CephService {
         .map(k -> cephAmazonS3.getObjectMetadata(cephBucketName, k)).collect(Collectors.toList()));
     log.info("Files metadata {} was found in ceph bucket {}", keys, cephBucketName);
     return toCephObjectMetadataList(result);
+  }
+
+  @Override
+  public CephObjectMetadata setUserMetadata(String cephBucketName, String key,
+      Map<String, String> userMetadata) {
+    assertBucketExists(cephAmazonS3, cephBucketName);
+
+    var newMetadata = new ObjectMetadata();
+    newMetadata.setUserMetadata(userMetadata);
+
+    var request = new CopyObjectRequest(cephBucketName, key, cephBucketName, key)
+        .withSourceBucketName(cephBucketName)
+        .withSourceKey(key)
+        .withNewObjectMetadata(newMetadata);
+
+    var result = execute(() -> {
+      cephAmazonS3.copyObject(request);
+      return cephAmazonS3.getObjectMetadata(cephBucketName, key);
+    });
+    log.info("User metadata has been assigned to the object with the key {} in the bucket {}",
+        key, cephBucketName);
+    return toCephObjectMetadata(result);
   }
 
   private void assertBucketExists(AmazonS3 cephAmazonS3, String cephBucketName) {
