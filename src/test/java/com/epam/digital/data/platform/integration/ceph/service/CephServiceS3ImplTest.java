@@ -376,4 +376,34 @@ class CephServiceS3ImplTest {
     assertThat(objectMetadata.get("checksum")).isEqualTo("sha256hex");
     assertThat(objectMetadata.get("filename")).isEqualTo("filename.png");
   }
+
+  @Test
+  void shouldSearchFileMetadataWhenOneOfKeysDoesNotExist() {
+    var key1 = "key1";
+    var key2 = "key2";
+    var bucketName = "bucket";
+    var userMetadata = Map.of(
+        "id", key1,
+        "checksum", "sha256hex",
+        "filename", "filename.png"
+    );
+    var testObjectMetadata = new ObjectMetadata();
+    testObjectMetadata.setContentLength(111L);
+    testObjectMetadata.setContentType("image/png");
+    testObjectMetadata.setUserMetadata(userMetadata);
+
+    when(amazonS3.listBuckets()).thenReturn(Collections.singletonList(new Bucket(bucketName)));
+    when(amazonS3.getObjectMetadata(bucketName, key1)).thenReturn(testObjectMetadata);
+    when(amazonS3.doesObjectExist(bucketName, key1)).thenReturn(true);
+    when(amazonS3.doesObjectExist(bucketName, key2)).thenReturn(false);
+
+    var metadata = cephServiceS3.getMetadata(bucketName, Set.of(key1, key2));
+    assertThat(metadata.size()).isOne();
+    var objectMetadata = metadata.get(0);
+    assertThat(objectMetadata.getContentLength()).isEqualTo(111L);
+    assertThat(objectMetadata.getContentType()).isEqualTo("image/png");
+    assertThat(objectMetadata.getUserMetadata().get("id")).contains(key1);
+    assertThat(objectMetadata.getUserMetadata().get("checksum")).contains("sha256hex");
+    assertThat(objectMetadata.getUserMetadata().get("filename")).contains("filename.png");
+  }
 }

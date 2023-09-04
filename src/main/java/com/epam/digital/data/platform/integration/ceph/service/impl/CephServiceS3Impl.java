@@ -196,16 +196,17 @@ public class CephServiceS3Impl implements CephService {
   public List<CephObjectMetadata> getMetadata(String cephBucketName, Set<String> keys) {
     log.info("Getting file metadata for keys {} from ceph bucket {}", keys, cephBucketName);
     assertBucketExists(cephAmazonS3, cephBucketName);
-    var doesContentExist = execute(
-        () -> keys.stream().allMatch(k -> cephAmazonS3.doesObjectExist(cephBucketName, k)));
-    if (!doesContentExist) {
-      log.info("One of the files {} wasn't found in ceph bucket {}", keys, cephBucketName);
+    var existingKeys = execute(
+        () -> keys.stream().filter(k -> cephAmazonS3.doesObjectExist(cephBucketName, k)).collect(
+            Collectors.toList()));
+    if (existingKeys.isEmpty()) {
+      log.info("Files {} wasn't found in ceph bucket {}", keys, cephBucketName);
       return Collections.emptyList();
     }
-    var result = execute(() -> keys.stream()
+    var result = execute(() -> existingKeys.stream()
         .map(k -> cephAmazonS3.getObjectMetadata(cephBucketName, k)).collect(Collectors.toList()));
 
-    log.info("Files metadata {} was found in ceph bucket {}", keys, cephBucketName);
+    log.info("Files metadata {} was found in ceph bucket {}", existingKeys, cephBucketName);
     return toCephObjectMetadataList(result);
   }
 
