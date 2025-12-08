@@ -19,6 +19,7 @@ package com.epam.digital.data.platform.integration.ceph.factory;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.epam.digital.data.platform.integration.ceph.config.S3ConfigProperties;
@@ -28,9 +29,16 @@ import com.epam.digital.data.platform.integration.ceph.service.impl.CephServiceS
 public class CephS3Factory {
 
   private final S3ConfigProperties s3ConfigProperties;
+  private final RequestMetricCollector metricsCollector;
 
   public CephS3Factory(S3ConfigProperties s3ConfigProperties) {
+    this(s3ConfigProperties, null);
+  }
+
+  public CephS3Factory(S3ConfigProperties s3ConfigProperties,
+      RequestMetricCollector metricsCollector) {
     this.s3ConfigProperties = s3ConfigProperties;
+    this.metricsCollector = metricsCollector;
   }
 
   public CephService createCephService(
@@ -40,7 +48,7 @@ public class CephS3Factory {
 
   private AmazonS3 s3Client(String cephEndpoint, String cephAccessKey, String cephSecretKey) {
     var clientOptions = s3ConfigProperties.getOptions();
-    return AmazonS3ClientBuilder.standard()
+    var builder = AmazonS3ClientBuilder.standard()
         .withCredentials(
             new AWSStaticCredentialsProvider(new BasicAWSCredentials(cephAccessKey, cephSecretKey)))
         .withClientConfiguration(s3ConfigProperties.getClient())
@@ -50,7 +58,10 @@ public class CephS3Factory {
         .withAccelerateModeEnabled(clientOptions.isAccelerateModeEnabled())
         .withPayloadSigningEnabled(clientOptions.isPayloadSigningEnabled())
         .withDualstackEnabled(clientOptions.isDualstackEnabled())
-        .withForceGlobalBucketAccessEnabled(clientOptions.isForceGlobalBucketAccessEnabled())
-        .build();
+        .withForceGlobalBucketAccessEnabled(clientOptions.isForceGlobalBucketAccessEnabled());
+    if (metricsCollector != null) {
+      builder.withMetricsCollector(metricsCollector);
+    }
+    return builder.build();
   }
 }
